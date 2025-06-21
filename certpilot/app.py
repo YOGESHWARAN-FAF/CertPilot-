@@ -246,7 +246,7 @@ def upload_file():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             file.save(filepath)
 
-            api_key = "AIzaSyDgqAoyLWk6Du7xTgXzghX2TtcE4N646Nk"  # Replace with your Gemini API key
+            api_key = "# Replace with your Gemini API key"  # Replace with your Gemini API key
             result = full_certificate_analysis(filepath, api_key)
 
             try:

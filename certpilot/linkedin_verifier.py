@@ -2,8 +2,8 @@ import google.generativeai as genai
 from serpapi import GoogleSearch
 
 # === CONFIGURE YOUR API KEYS ===
-GEMINI_API_KEY = "AIzaSyDgqAoyLWk6Du7xTgXzghX2TtcE4N646Nk"  # Replace with your Gemini API key
-SERPAPI_KEY = "05abd34e01cbd3f240ffc676d890de4baf6ed57ce8a47a0ec9c4bec459ea75f5"  # Replace with your SerpAPI key
+GEMINI_API_KEY = "# Replace with your Gemini API key"  # Replace with your Gemini API key
+SERPAPI_KEY = "# Replace with your SerpAPI key"  # Replace with your SerpAPI key
 
 # === SETUP GEMINI ===
 genai.configure(api_key=GEMINI_API_KEY)

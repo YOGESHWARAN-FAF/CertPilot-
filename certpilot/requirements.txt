@@ -1,0 +1,10 @@
+requests
+whois
+pillow
+pytesseract
+opencv-python
+google-generativeai
+playwright
+beautifulsoup4
+serpapi
+numpy

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Certificate Verifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.6s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #8b5cf6;
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header/Nav -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <h1 class="text-2xl font-bold">CertVerify</h1>
+                </div>
+                <nav>
+                    <ul class="flex space-x-6">
+                        <li><a href="#" class="hover:underline">Home</a></li>
+                        <li><a href="http://127.0.0.1:5000/workflow" class="hover:underline">How it works</a></li>
+                        <li><a href="#" class="hover:underline">About</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">AI-Powered Certificate Verifier</h1>
+                <p class="text-xl mb-8">Instantly verify the authenticity of certificates using advanced AI, OCR, and web verification technologies.</p>
+                <button id="uploadBtn" class="bg-white text-purple-600 hover:bg-purple-100 font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                    Upload Certificate
+                </button>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_vybwn7df.json" background="transparent" speed="1" style="width: 100%; max-width: 500px;" loop autoplay></lottie-player>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div class="flex justify-between items-center border-b px-6 py-4">
+                <h3 class="text-xl font-semibold text-gray-800">Upload Certificate</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="uploadArea" class="upload-area rounded-lg p-12 text-center cursor-pointer mb-6">
+                    <div class="flex flex-col items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-purple-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <h4 class="text-lg font-medium text-gray-700">Drag & drop your certificate here</h4>
+                        <p class="text-gray-500 mt-2">or</p>
+                        <button id="selectFileBtn" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition duration-300">
+                            Select File
+                        </button>
+                        <input type="file" id="fileInput" class="hidden" accept=".png,.jpg,.jpeg">
+                    </div>
+                </div>
+                <div id="filePreview" class="hidden mb-6">
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <img id="previewImage" src="" alt="Preview" class="h-16 w-16 object-cover rounded mr-4">
+                            <div>
+                                <p id="fileName" class="font-medium text-gray-800"></p>
+                                <p id="fileSize" class="text-sm text-gray-500"></p>
+                            </div>
+                        </div>
+                        <button id="removeFile" class="text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button id="verifyBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Verify Certificate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Section -->
+    <div id="processingSection" class="hidden py-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="inline-block mb-6">
+                <svg class="animate-spin h-12 w-12 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-2">Analyzing Certificate</h3>
+            <p class="text-gray-600 max-w-2xl mx-auto">Our AI is examining the certificate details, verifying against online sources, and checking for authenticity markers. This may take a few moments.</p>
+            <div class="mt-6 max-w-md mx-auto bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="hidden py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Verification Results</h2>
+                <div class="w-20 h-1 bg-purple-600 mx-auto"></div>
+            </div>
+
+            <!-- Certificate Preview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden slide-in">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Certificate Preview</h3>
+                        <div class="flex justify-center">
+                            <img id="resultCertificateImage" src="" alt="Certificate" class="max-h-80 rounded-lg border border-gray-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verdict Card -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden slide-in">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Final Verdict</h3>
+                        <div id="verdictBadge" class="inline-block px-4 py-2 rounded-full text-white font-bold mb-6"></div>
+                        <p id="verdictReason" class="text-gray-700 mb-6"></p>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <h4 class="font-medium text-gray-800 mb-2">Confidence Score</h4>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="confidenceBar" class="h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p id="confidenceText" class="text-right text-sm text-gray-600 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Results -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Extracted Fields -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Extracted Fields</h3>
+                        </div>
+                        <div id="extractedFields" class="space-y-3">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Website Verification -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-blue-100 p-2 rounded-lg mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Website Verification</h3>
+                        </div>
+                        <div id="websiteFields" class="space-y-3">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+               <!-- Website Trust -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+    <div class="p-6">
+        <div class="flex items-center mb-4">
+            <div class="bg-green-100 p-2 rounded-lg mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800">Website Trust</h3>
+        </div>
+        <div id="websiteTrust" class="space-y-4">
+            <!-- This will be populated dynamically -->
+        </div>
+    </div>
+</div>
+               <!-- Social Media -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+    <div class="p-6">
+        <div class="flex items-center mb-4">
+            <div class="bg-pink-100 p-2 rounded-lg mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800">Social Media Presence</h3>
+        </div>
+        <div id="socialMedia" class="space-y-3">
+            <!-- This will be populated dynamically -->
+        </div>
+    </div>
+</div>
+                <!-- LinkedIn Analysis -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-blue-100 p-2 rounded-lg mr-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667h-3.554v-11.452h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019h-3.564v-11.452h3.564v11.452zM22.225 0h-20.451c-.975 0-1.774.789-1.774 1.774v20.451c0 .986.799 1.774 1.774 1.774h20.451c.987 0 1.774-.789 1.774-1.774v-20.451c0-.986-.787-1.774-1.774-1.774z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800">LinkedIn Analysis</h3>
+                        </div>
+                        <div id="linkedInResults" class="space-y-3">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+               <!-- Review Summary -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden fade-in">
+    <div class="p-6">
+        <div class="flex items-center mb-4">
+            <div class="bg-yellow-100 p-2 rounded-lg mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800">AI Review Summary</h3>
+        </div>
+        <div id="reviewSummary" class="space-y-4">
+            <!-- This will be populated dynamically -->
+        </div>
+    </div>
+</div>
+            <!-- Certificate URL -->
+            <div class="mt-8 bg-white rounded-xl shadow-md overflow-hidden fade-in">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Certificate Verification URL</h3>
+                    </div>
+                    <div class="flex items-center">
+                        <a id="certificateUrl" href="#" target="_blank" class="text-purple-600 hover:underline break-all"></a>
+                        <button id="copyUrl" class="ml-4 text-gray-500 hover:text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Verification Button -->
+            <div class="mt-12 text-center">
+                <button id="newVerificationBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                    Verify Another Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-16 transition-transform duration-300 z-50 hidden">
+        <div class="flex items-center">
+            <span id="toastMessage"></span>
+            <button id="closeToast" class="ml-4 text-gray-300 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    // DOM Elements
+    const uploadBtn = document.getElementById('uploadBtn');
+    const uploadModal = document.getElementById('uploadModal');
+    const closeModal = document.getElementById('closeModal');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const filePreview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFile = document.getElementById('removeFile');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const processingSection = document.getElementById('processingSection');
+    const resultsSection = document.getElementById('resultsSection');
+    const progressBar = document.getElementById('progressBar');
+    const resultCertificateImage = document.getElementById('resultCertificateImage');
+    const verdictBadge = document.getElementById('verdictBadge');
+    const verdictReason = document.getElementById('verdictReason');
+    const confidenceBar = document.getElementById('confidenceBar');
+    const confidenceText = document.getElementById('confidenceText');
+    const extractedFields = document.getElementById('extractedFields');
+    const websiteFields = document.getElementById('websiteFields');
+    const websiteTrust = document.getElementById('websiteTrust');
+    const socialMedia = document.getElementById('socialMedia');
+    const linkedInResults = document.getElementById('linkedInResults');
+    const reviewSummary = document.getElementById('reviewSummary');
+    const certificateUrl = document.getElementById('certificateUrl');
+    const copyUrl = document.getElementById('copyUrl');
+    const newVerificationBtn = document.getElementById('newVerificationBtn');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    const closeToast = document.getElementById('closeToast');
+
+    // Variables
+    let selectedFile = null;
+
+    // Event Listeners
+    uploadBtn.addEventListener('click', () => {
+        uploadModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    });
+
+    closeModal.addEventListener('click', () => {
+        uploadModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    });
+
+    selectFileBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect({ target: fileInput });
+        }
+    });
+
+    removeFile.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        verifyBtn.disabled = true;
+    });
+
+    verifyBtn.addEventListener('click', verifyCertificate);
+
+    newVerificationBtn.addEventListener('click', () => {
+        resultsSection.classList.add('hidden');
+        uploadModal.classList.remove('hidden');
+        // Reset file input
+        selectedFile = null;
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        verifyBtn.disabled = true;
+    });
+
+    closeToast.addEventListener('click', () => {
+        toast.classList.add('hidden');
+    });
+
+    copyUrl.addEventListener('click', () => {
+        navigator.clipboard.writeText(certificateUrl.href);
+        showToast('URL copied to clipboard!');
+    });
+
+    // Functions
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        
+        if (!file) return;
+        
+        // Check file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+            showToast('Please select a valid image file (JPEG, PNG)');
+            return;
+        }
+        
+        selectedFile = file;
+        
+        // Display file info
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            filePreview.classList.remove('hidden');
+            verifyBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function verifyCertificate() {
+        if (!selectedFile) return;
+        
+        // Show processing section
+        uploadModal.classList.add('hidden');
+        processingSection.classList.remove('hidden');
+        document.body.style.overflow = 'auto';
+        
+        // Simulate progress (we'll update this with real progress later)
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 10;
+            if (progress >= 90) { // Stop at 90% to wait for actual upload completion
+                progress = 90;
+                clearInterval(interval);
+            }
+            progressBar.style.width = `${progress}%`;
+        }, 300);
+        
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        // Make the actual API call to your Flask backend
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Complete the progress bar
+            progressBar.style.width = '100%';
+            
+            // Process the response data
+            setTimeout(() => {
+                displayResults(data);
+            }, 500);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error processing certificate. Please try again.');
+            // Reset UI
+            processingSection.classList.add('hidden');
+            uploadModal.classList.remove('hidden');
+        });
+    }
+
+    function displayResults(data) {
+        processingSection.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+        
+        // Set certificate image
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            resultCertificateImage.src = e.target.result;
+        };
+        reader.readAsDataURL(selectedFile);
+        
+        // Check if there was an error in processing
+        if (data.error) {
+            verdictBadge.textContent = "⚠ Verification Error";
+            verdictBadge.className = "inline-block px-4 py-2 rounded-full bg-yellow-500 text-white font-bold mb-6";
+            verdictReason.textContent = data.error;
+            confidenceBar.style.width = "0%";
+            confidenceText.textContent = "0% confidence";
+            showToast("Error processing certificate: " + data.error);
+            return;
+        }
+        
+        // Set verdict from the comparison result
+        const verdict = data.comparison_result?.Final_Verdict || "Unknown";
+        const confidence = data.comparison_result?.confidence || (verdict === "Real" ? 85 : 30);
+        const reason = data.comparison_result?.Reason || "No verification information available";
+        
+        if (verdict === "Real" || verdict === "Authentic") {
+            verdictBadge.textContent = "✓ Authentic";
+            verdictBadge.className = "inline-block px-4 py-2 rounded-full bg-green-500 text-white font-bold mb-6";
+            confidenceBar.className = "h-2.5 rounded-full bg-green-500";
+        } else if (verdict === "Possibly Fake" || verdict === "Fake") {
+            verdictBadge.textContent = "⚠ Possibly Fake";
+            verdictBadge.className = "inline-block px-4 py-2 rounded-full bg-red-500 text-white font-bold mb-6";
+            confidenceBar.className = "h-2.5 rounded-full bg-red-500";
+        } else {
+            verdictBadge.textContent = "❓ Unknown";
+            verdictBadge.className = "inline-block px-4 py-2 rounded-full bg-yellow-500 text-white font-bold mb-6";
+            confidenceBar.className = "h-2.5 rounded-full bg-yellow-500";
+        }
+        
+        verdictReason.textContent = reason;
+        confidenceBar.style.width = `${confidence}%`;
+        confidenceText.textContent = `${confidence}% confidence`;
+        
+        // Extracted fields
+        extractedFields.innerHTML = '';
+        const extractedData = data.extracted_fields || {};
+        for (const [key, value] of Object.entries(extractedData)) {
+            const fieldItem = document.createElement('div');
+            fieldItem.className = 'flex justify-between';
+            fieldItem.innerHTML = `
+                <span class="text-gray-600">${formatKey(key)}</span>
+                <span class="font-medium text-gray-800">${value || 'Not found'}</span>
+            `;
+            extractedFields.appendChild(fieldItem);
+        }
+        
+        // Website fields
+        websiteFields.innerHTML = '';
+        const websiteData = data.website_fields || {};
+        for (const [key, value] of Object.entries(websiteData)) {
+            const fieldItem = document.createElement('div');
+            fieldItem.className = 'flex justify-between';
+            
+            if ((key === 'institution_website' || key === 'verification_page' || key === 'website') && 
+                typeof value === 'string' && value.startsWith('http')) {
+                fieldItem.innerHTML = `
+                    <span class="text-gray-600">${formatKey(key)}</span>
+                    <a href="${value}" target="_blank" class="text-blue-600 hover:underline">Visit</a>
+                `;
+            } else {
+                fieldItem.innerHTML = `
+                    <span class="text-gray-600">${formatKey(key)}</span>
+                    <span class="font-medium text-gray-800">${value || 'N/A'}</span>
+                `;
+            }
+            websiteFields.appendChild(fieldItem);
+        }
+        
+        // Website trust
+websiteTrust.innerHTML = '';
+const trustData = data.website_trust || {};
+
+// Parse the raw string if it exists
+if (typeof trustData === 'string') {
+    try {
+        // Try to extract structured information from the string
+        const sslSupported = trustData.includes('HTTPS supported');
+        const isReachable = trustData.includes('200 OK');
+        
+        // Extract domain age if available
+        let domainAge = '';
+        const ageMatch = trustData.match(/Domain age: (\d+ years)/);
+        if (ageMatch) {
+            domainAge = ageMatch[1];
+        }
+        
+        // Create structured items
+        const items = [
+            {
+                label: 'SSL/TLS',
+                value: sslSupported ? 'Supported (HTTPS)' : 'Not Supported',
+                status: sslSupported ? 'good' : 'bad'
+            },
+            {
+                label: 'Website Reachable',
+                value: isReachable ? 'Yes (200 OK)' : 'No',
+                status: isReachable ? 'good' : 'bad'
+            },
+            {
+                label: 'Domain Age',
+                value: domainAge || 'Unknown',
+                status: domainAge ? 'neutral' : 'unknown'
+            }
+        ];
+        
+        // Display each item
+        items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'flex justify-between items-center';
+            
+            const statusColor = item.status === 'good' ? 'text-green-600' : 
+                              item.status === 'bad' ? 'text-red-600' : 'text-gray-600';
+            
+            itemDiv.innerHTML = `
+                <span class="text-gray-600">${item.label}</span>
+                <span class="font-medium ${statusColor}">
+                    ${item.value}
+                    ${item.status === 'good' ? ' ✓' : item.status === 'bad' ? ' ✗' : ''}
+                </span>
+            `;
+            websiteTrust.appendChild(itemDiv);
+        });
+        
+    } catch (e) {
+        // Fallback if parsing fails
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'text-gray-500 italic';
+        errorDiv.textContent = 'Could not parse website trust information';
+        websiteTrust.appendChild(errorDiv);
+    }
+} else if (typeof trustData === 'object') {
+    // Handle structured data
+    const items = [
+        {
+            label: 'SSL/TLS',
+            value: trustData.ssl ? 'Supported (HTTPS)' : 'Not Supported',
+            status: trustData.ssl ? 'good' : 'bad',
+            key: 'ssl'
+        },
+        {
+            label: 'Website Reachable',
+            value: trustData.reachable ? 'Yes' : 'No',
+            status: trustData.reachable ? 'good' : 'bad',
+            key: 'reachable'
+        },
+        {
+            label: 'Domain Age',
+            value: trustData.domain_age || 'Unknown',
+            status: 'neutral',
+            key: 'domain_age'
+        },
+        {
+            label: 'Trust Score',
+            value: trustData.trust_score ? `${trustData.trust_score}/100` : 'Not Rated',
+            status: trustData.trust_score > 70 ? 'good' : 
+                   trustData.trust_score > 40 ? 'neutral' : 'bad',
+            key: 'trust_score'
+        }
+    ];
+    
+    items.forEach(item => {
+        if (trustData[item.key] !== undefined) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'flex justify-between items-center';
+            
+            const statusColor = item.status === 'good' ? 'text-green-600' : 
+                              item.status === 'bad' ? 'text-red-600' : 'text-gray-600';
+            
+            itemDiv.innerHTML = `
+                <span class="text-gray-600">${item.label}</span>
+                <span class="font-medium ${statusColor}">
+                    ${item.value}
+                    ${item.status === 'good' ? ' ✓' : item.status === 'bad' ? ' ✗' : ''}
+                </span>
+            `;
+            websiteTrust.appendChild(itemDiv);
+        }
+    });
+    
+    if (websiteTrust.children.length === 0) {
+        const noDataMsg = document.createElement('div');
+        noDataMsg.className = 'text-gray-500 italic';
+        noDataMsg.textContent = 'No website trust information available';
+        websiteTrust.appendChild(noDataMsg);
+    }
+}
+        // Social media
+socialMedia.innerHTML = '';
+const socialData = data.social_media || {};
+
+// Check if we have the social links in the expected format
+if (socialData['Found Social Links']) {
+    const socialLinks = socialData['Found Social Links'];
+    
+    // Create social media links for each platform
+    const platforms = {
+        'Facebook': { icon: 'facebook', color: 'blue-600' },
+        'Twitter': { icon: 'twitter', color: 'blue-400' },
+        'LinkedIn': { icon: 'linkedin', color: 'blue-700' },
+        'YouTube': { icon: 'youtube', color: 'red-600' },
+        'Instagram': { icon: 'instagram', color: 'pink-600' }
+    };
+
+    for (const [platform, url] of Object.entries(socialLinks)) {
+        if (url && typeof url === 'string' && url.startsWith('http')) {
+            const platformInfo = platforms[platform] || { icon: 'link', color: 'gray-600' };
+            
+            const fieldItem = document.createElement('div');
+            fieldItem.className = 'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg';
+            
+            fieldItem.innerHTML = `
+                <div class="flex items-center">
+                    <div class="bg-${platformInfo.color}/10 p-2 rounded-lg mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-${platformInfo.color}" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                        </svg>
+                    </div>
+                    <span class="text-gray-800 font-medium">${platform}</span>
+                </div>
+                <a href="${url}" target="_blank" class="text-blue-600 hover:underline text-sm">Visit Profile</a>
+            `;
+            socialMedia.appendChild(fieldItem);
+        }
+    }
+} else if (Object.keys(socialData).length > 0) {
+    // Fallback for other formats
+    for (const [platform, url] of Object.entries(socialData)) {
+        if (url && typeof url === 'string' && url.startsWith('http')) {
+            const fieldItem = document.createElement('div');
+            fieldItem.className = 'flex justify-between p-3 hover:bg-gray-50 rounded-lg';
+            fieldItem.innerHTML = `
+                <span class="text-gray-600">${platform}</span>
+                <a href="${url}" target="_blank" class="text-blue-600 hover:underline">Visit</a>
+            `;
+            socialMedia.appendChild(fieldItem);
+        }
+    }
+} else {
+    const noDataMsg = document.createElement('div');
+    noDataMsg.className = 'text-gray-500 italic text-center py-4';
+    noDataMsg.textContent = 'No social media links found';
+    socialMedia.appendChild(noDataMsg);
+}
+    // LinkedIn results
+linkedInResults.innerHTML = '';
+const linkedinData = data.linkedin_results || [];
+
+if (Array.isArray(linkedinData) && linkedinData.length > 0) {
+    // Create a header for LinkedIn section
+    const header = document.createElement('h4');
+    header.className = 'text-lg font-semibold mb-3';
+    header.textContent = 'LinkedIn Verification Posts';
+    linkedInResults.appendChild(header);
+
+    linkedinData.forEach((postData, index) => {
+        // Parse the analysis JSON (handling both raw JSON and string formats)
+        let analysis = {};
+        try {
+            // Remove markdown code blocks if present
+            const analysisStr = postData.analysis.replace(/```json\n|\n```/g, '');
+            analysis = JSON.parse(analysisStr);
+        } catch (e) {
+            try {
+                analysis = JSON.parse(postData.analysis);
+            } catch (e2) {
+                analysis = {
+                    status: 'Unknown',
+                    reason: 'Could not parse analysis'
+                };
+            }
+        }
+
+        const postContainer = document.createElement('div');
+        postContainer.className = 'mb-6 p-4 bg-white rounded-lg shadow';
+
+        // Post content
+        const postContent = document.createElement('p');
+        postContent.className = 'mb-3 text-gray-700';
+        postContent.textContent = postData.post;
+        postContainer.appendChild(postContent);
+
+        // Analysis status
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'flex items-center mb-2';
+        
+        const statusLabel = document.createElement('span');
+        statusLabel.className = 'font-medium mr-2';
+        statusLabel.textContent = 'Verification:';
+        
+        const statusValue = document.createElement('span');
+        statusValue.className = analysis.status === 'Good' 
+            ? 'bg-green-100 text-green-800 px-2 py-1 rounded text-sm'
+            : 'bg-red-100 text-red-800 px-2 py-1 rounded text-sm';
+        statusValue.textContent = analysis.status;
+        
+        statusDiv.appendChild(statusLabel);
+        statusDiv.appendChild(statusValue);
+        postContainer.appendChild(statusDiv);
+
+        // Analysis reason
+        const reasonDiv = document.createElement('div');
+        reasonDiv.className = 'text-sm text-gray-600 bg-gray-50 p-3 rounded';
+        reasonDiv.textContent = analysis.reason;
+        postContainer.appendChild(reasonDiv);
+
+        linkedInResults.appendChild(postContainer);
+    });
+} else {
+    const noDataMsg = document.createElement('div');
+    noDataMsg.className = 'text-gray-500 italic';
+    noDataMsg.textContent = 'No LinkedIn verification posts available';
+    linkedInResults.appendChild(noDataMsg);
+}
+      // Review summary
+reviewSummary.innerHTML = '';
+
+try {
+    let summaryData = data.review_summary;
+    
+    // Handle both string and object formats
+    if (typeof summaryData === 'string') {
+        // Remove markdown code blocks if present
+        summaryData = summaryData.replace(/```json\n|\n```/g, '');
+        summaryData = JSON.parse(summaryData);
+    } else if (typeof summaryData === 'object') {
+        // Already parsed
+        summaryData = data.review_summary;
+    } else {
+        throw new Error('Invalid review summary format');
+    }
+
+    // Create summary card
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'bg-gray-50 p-4 rounded-lg';
+    
+    // Create sentiment indicator
+    const sentimentDiv = document.createElement('div');
+    sentimentDiv.className = 'flex items-center mb-3';
+    
+    const sentimentColor = summaryData.Sentiment === 'Positive' ? 'bg-green-100 text-green-800' : 
+                         summaryData.Sentiment === 'Negative' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+    
+    sentimentDiv.innerHTML = `
+        <span class="font-medium mr-2">Overall Sentiment:</span>
+        <span class="${sentimentColor} px-3 py-1 rounded-full text-sm font-medium">
+            ${summaryData.Sentiment || 'Neutral'}
+        </span>
+    `;
+    summaryCard.appendChild(sentimentDiv);
+    
+    // Create star rating
+    if (summaryData['Star Rating']) {
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'flex items-center mb-4';
+        
+        const stars = summaryData['Star Rating'].split('/')[0]; // Extract "5" from "5/5"
+        ratingDiv.innerHTML = `
+            <span class="font-medium mr-2">Rating:</span>
+            <div class="flex items-center">
+                ${Array.from({length: 5}).map((_, i) => 
+                    `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${i < stars ? 'text-yellow-500 fill-current' : 'text-gray-300'}" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>`
+                ).join('')}
+                <span class="ml-2 text-gray-600">${summaryData['Star Rating']}</span>
+            </div>
+        `;
+        summaryCard.appendChild(ratingDiv);
+    }
+    
+    // Create summary text
+    const summaryTextDiv = document.createElement('div');
+    summaryTextDiv.className = 'text-gray-700';
+    summaryTextDiv.innerHTML = `
+        <h4 class="font-medium mb-2">Key Findings:</h4>
+        <p>${summaryData.Summary || 'No detailed summary available.'}</p>
+    `;
+    summaryCard.appendChild(summaryTextDiv);
+    
+    // Add to DOM
+    reviewSummary.appendChild(summaryCard);
+    
+} catch (e) {
+    console.error('Error parsing review summary:', e);
+    
+    // Fallback display
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'bg-gray-50 p-4 rounded-lg text-gray-700';
+    
+    if (typeof data.review_summary === 'string') {
+        errorDiv.innerHTML = `
+            <h4 class="font-medium mb-2">Review Summary:</h4>
+            <p>${data.review_summary}</p>
+        `;
+    } else {
+        errorDiv.textContent = 'Could not parse review summary data.';
+    }
+    
+    reviewSummary.appendChild(errorDiv);
+}
+        
+        // Certificate URL
+        if (data.certificate_url) {
+            certificateUrl.href = data.certificate_url;
+            certificateUrl.textContent = data.certificate_url;
+        } else {
+            certificateUrl.href = "#";
+            certificateUrl.textContent = "No verification URL available";
+        }
+    }
+
+    function formatKey(key) {
+        return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function showToast(message) {
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 5000);
+    }
+</script>
+</body>
+</html>
